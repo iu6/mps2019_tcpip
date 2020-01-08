@@ -196,11 +196,11 @@ public:
 	 */
 	void set_SrcIp(const uint8_t* ip);
 	
-	void eth_read(enc28j60_frame_ptr *frame, uint16_t len);
+	byte eth_read(enc28j60_frame_ptr *frame, uint16_t len, byte flag_1);
 	
-	byte arp_read(enc28j60_frame_ptr *frame, uint16_t len);
+	byte arp_read(enc28j60_frame_ptr *frame, uint16_t len, byte flag_1);
 	
-	void net_pool(void);
+	void net_pool(byte flag_1);
 	
 	//void arp_table_fill(enc28j60_frame_ptr *frame);
 };

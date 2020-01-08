@@ -219,19 +219,21 @@ void ArpUtil::set_DstIp(const uint8_t* ip) {
 	setIp(ip, packet.data.arp.dstIp);
 }
 
-void ArpUtil::net_pool(void)
+void ArpUtil::net_pool(byte flag_1)
 {
   uint16_t len;
+  byte res;
   enc28j60_frame_ptr *frame = (void*)net_buf;
-
   while((len = ether.enc28j60_packetReceive(net_buf, sizeof(net_buf))))
   {
-    eth_read(frame, len);
+    res = eth_read(frame, len, flag_1);
+	Serial.println(res);
   }
 }
 
-void ArpUtil::eth_read(enc28j60_frame_ptr *frame, uint16_t len)
+byte ArpUtil::eth_read(enc28j60_frame_ptr *frame, uint16_t len, byte flag_1)
 {
+	byte res = 0;
      // Serial.println("Read eth");
   if(len >= sizeof(enc28j60_frame_ptr))
   {
@@ -242,14 +244,15 @@ void ArpUtil::eth_read(enc28j60_frame_ptr *frame, uint16_t len)
     if (frame->type==ETH_arp)
     {
       Serial.print(F("; arp\n"));
-      arp_read(frame, len - sizeof(enc28j60_frame_ptr));
+      arp_read(frame, len - sizeof(enc28j60_frame_ptr), flag_1);
     }
     if (frame->type==ETH_ip) Serial.print(F("; ip"));
     Serial.println();
   }
+  return res;
 }
 
-byte ArpUtil::arp_read(enc28j60_frame_ptr *frame, uint16_t len) //парсинг arp-запросов с внешних устройств
+byte ArpUtil::arp_read(enc28j60_frame_ptr *frame, uint16_t len, byte flag_1) //парсинг arp-запросов с внешних устройств
 {
 	//Serial.println("Read arp");
   byte res = 0;
@@ -280,9 +283,9 @@ byte ArpUtil::arp_read(enc28j60_frame_ptr *frame, uint16_t len) //парсинг
         sprintf(str1,"%02X:%02X:%02X:%02X:%02X:%02X",
         msg->macaddr_src[0], msg->macaddr_src[1], msg->macaddr_src[2], msg->macaddr_src[3], msg->macaddr_src[4], msg->macaddr_src[5]);
         arputil.set_DstMac(str1);
-		arputil.set_ARP_SrcMac("74:69:60:2D:30:34");
+    //		arputil.set_ARP_SrcMac("74:69:60:2D:30:34");
         arputil.send();
-		 res=1;
+		if (flag_1 == 1) res=1;
       }
     }
   }

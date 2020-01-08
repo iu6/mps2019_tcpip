@@ -46,18 +46,18 @@ void setup() {
 void loop() {
   arputil.net_pool();
   //КНОПКА 1
-    if(digitalRead(8)==HIGH&&flag_1==0){
-       flag_1 = 1;
-       lcd.clear(); 
-       lcd.setCursor(0, 0); lcd.print("MAC_my:");
-       lcd.setCursor(0, 1);
-       for (byte i = 0; i < 6; ++i) {
-        lcd.print(arputil.mymac[i], HEX);
-        if ((i%2) == 0)lcd.print(':');       
-       }
-       flag_1_dc = 1;
-   }
-      if(digitalRead(8)==LOW&&flag_1_dc==1){flag_1_dc=0; flag_1=0;}
+//    if(digitalRead(8)==HIGH&&flag_1==0){
+//       flag_1 = 1;
+//       lcd.clear(); 
+//       lcd.setCursor(0, 0); lcd.print("MAC_my:");
+//       lcd.setCursor(0, 1);
+//       for (byte i = 0; i < 6; ++i) {
+//        lcd.print(arputil.mymac[i], HEX);
+//        if ((i%2) == 0)lcd.print(':');       
+//       }
+//       flag_1_dc = 1;
+//   }
+   //   if(digitalRead(8)==LOW&&flag_1_dc==1){flag_1_dc=0; flag_1=0;}
 //       if(digitalRead(8)==HIGH&&flag_1==1&&flag_1_dc==1){
 //       lcd.clear(); 
 //       lcd.setCursor(0, 0); lcd.print("MAC_neighbour:");
