@@ -41,16 +41,17 @@ void setup() {
   	} 
     lcd.begin(16, 2);
     lcd.setRGB(0, 100, 200);
-//    lcd.setCursor(0, 0);
-//    lcd.print("connected to LAN");
+     lcd.setCursor(0, 0);
+     lcd.print("connected to LAN");
      digitalWrite(6, HIGH);
 }
 
 void loop() {
   if (digitalRead(8)==HIGH)
   {
-    flag_1 = 1;
+    flag_1 = 2;
   } 
-  result = arputil.net_pool(flag_1);
-  flag_1 = 0;
+ // Serial.println(flag_1);
+  arputil.net_pool(flag_1);
+  //flag_1 = 0;
 }

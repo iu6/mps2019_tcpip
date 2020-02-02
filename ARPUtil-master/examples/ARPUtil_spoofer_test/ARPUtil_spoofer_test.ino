@@ -1,12 +1,12 @@
-#include <bufferfiller.h>
-#include <enc28j60.h>
-#include <avr/pgmspace.h>
-#include <EtherCard.h>
-#include <net.h>
-#include <stash.h>
-#include <bufferfiller.h>
-#include <avr/io.h>
-#include <avr/interrupt.h>
+//#include <bufferfiller.h>
+//#include <enc28j60.h>
+//#include <avr/pgmspace.h>
+//#include <EtherCard.h>
+//#include <net.h>
+//#include <stash.h>
+//#include <bufferfiller.h>
+//#include <avr/io.h>
+//#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +16,9 @@
 #include <ArpUtil.h>
 #include "rgb_lcd.h"
 rgb_lcd lcd;
-byte work_mode = 0, pr_mode = 1;  
+byte work_mode = 0, pr_mode = 1;
+byte flag1 = 0; 
+boolean buttonWasUp = true;  // была ли кнопка отпущена? 
 byte result;
 //char str[12] = {0};
 void setup() {
@@ -43,39 +45,98 @@ void setup() {
 void loop() {
   if (pr_mode == 1)
   {
+    //Serial.println("begin");
      while (work_mode == 0) 
     {
-      if (digitalRead(8)==HIGH)
+      bool current = digitalRead(8);
+      if (current && flag1 == 0)
       {
+        while (current != LOW) {                  // Старое значение отличается от полученного
+          delay(10);                                  // Ждем пока состояние стабилизируется - игнорируем дребезг
+          current = digitalRead(8);           // Считываем стабилизированное значение
+        }
+        flag1 = 1;
         work_mode = 1;
-      } else if (digitalRead(9)==HIGH)
+        
+      }
+      if (digitalRead(9)==HIGH)
       {
         work_mode = 2;
       } 
     }
-   // Serial.println(work_mode);
-    result = arputil.net_pool(work_mode);
-    if (digitalRead(8)==HIGH && work_mode != 3) 
+    arputil.net_pool(work_mode);
+    result = arputil.result;
+    if (digitalRead(8)==HIGH && flag1 != 1) 
     {
+      flag1 = 1;
       pr_mode = 2;
-      work_mode = 3;
+    //  work_mode = 3;
     }
+    flag1 = 0;
+    //Serial.println(arputil.result);
   } else if (pr_mode == 2)
   {
-    //вывод на дисплей
-    Serial.println("print");
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Remote MAC");
-    lcd.setCursor(0, 1);
-    for (byte i = 0; i < 6; i++) {
-     lcd.print(arputil.remotemac[i], HEX);    
-    }
-    while (1) 
+    if (work_mode == 1)
+    { //вывод на дисплей
+     // Serial.println(result);
+      if (result == 2)
+      {
+        printRemoteMAC();
+        //delay(1000);
+      } else 
+      { 
+        printNoHost();
+        delay(1000);
+      }
+    } else if (work_mode == 2)
     {
-      //остальное
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Attacked:");
+      //delay(1000);
+      if (result == 3) 
+      {
+        printRemoteMAC();
+        //delay(1000);
+        //printRemoteIP();
+        //delay(1000);
+      } else printNoHost();
     }
   }
+}
+
+void printRemoteMAC()
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Remote MAC");
+  lcd.setCursor(0, 1);
+  for (byte i = 0; i < 6; i++) {
+    lcd.print(arputil.remotemac[i], HEX);    
+  }
+  delay(1000);
+}
+
+void printRemoteIP()
+{
+  //lcd.begin(16, 2);
+  //lcd.setRGB(0, 100, 200);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("");
+  lcd.setCursor(0, 1);
+  for (byte i = 0; i < 4; i++) {
+    lcd.print(arputil.remoteip[i]);    
+  }
+}
+
+void printNoHost()
+{
+  //lcd.begin(16, 2);
+  //lcd.setRGB(0, 100, 200);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("No host");
 }
 
 //if (result == 3)
